@@ -11,6 +11,8 @@ from app.db import Base, SessionLocal, engine
 from app.llm import get_llm
 from app.llm.embeddings import get_embedder
 from app.models import CustomerMessage, Draft, KnowledgeChunk, Status
+from app.shopify.client import client_from_env
+from app.shopify_knowledge import load_from_shopify
 from app.store import get_store
 from app.tools import ToolBox
 
@@ -55,13 +57,16 @@ def add_message(sender: str = Form(), body: str = Form(), subject: str = Form(""
 
 @app.post("/knowledge/rebuild")
 def rebuild_knowledge(session: Session = Depends(get_session)):
-    knowledge.rebuild(session, knowledge.load_sample_store(), get_embedder())
+    client = client_from_env()
+    pieces = load_from_shopify(client) if client else knowledge.load_sample_store()
+    knowledge.rebuild(session, pieces, get_embedder())
     return RedirectResponse("/knowledge", status_code=303)
 
 
 @app.get("/knowledge", response_class=HTMLResponse)
 def knowledge_page(q: str = Query(""), session: Session = Depends(get_session)):
     count = session.query(KnowledgeChunk).count()
+    source = "Shopify" if client_from_env() else "sample store (test data)"
     hits = knowledge.search(session, q, get_embedder()) if q and count else []
     results = "".join(
         f"<li><strong>{escape(h.chunk.title)}</strong> <small>{h.score:.2f} · {h.chunk.source}</small>"
@@ -70,7 +75,7 @@ def knowledge_page(q: str = Query(""), session: Session = Depends(get_session)):
     )
     return f"""<!doctype html><title>Knowledge · Docket</title><h1>Knowledge base</h1>
 <p>{count} chunks.</p>
-<form method=post action=/knowledge/rebuild><button>Rebuild from sample store</button></form>
+<form method=post action=/knowledge/rebuild><button>Rebuild from {source}</button></form>
 <form><input name=q value="{escape(q)}" placeholder="Ask like a customer would" size=50><button>Search</button></form>
 <ol>{results}</ol>"""
 
