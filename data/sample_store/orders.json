@@ -1,0 +1,9 @@
+[
+  {"name": "#1001", "email": "kati@example.com", "created": "2026-11-20",
+   "financial": "Paid", "fulfillment": "Fulfilled",
+   "tracking": [{"company": "Omniva", "number": "CE123456789EE", "url": "https://www.omniva.ee/track?barcode=CE123456789EE"}],
+   "items": ["1 × The Multi-location Snowboard (159 cm)"]},
+  {"name": "#1002", "email": "janis@example.com", "created": "2026-11-24",
+   "financial": "Paid", "fulfillment": "Unfulfilled", "tracking": [],
+   "items": ["1 × The Collection Snowboard: Oxygen (160 cm)"]}
+]

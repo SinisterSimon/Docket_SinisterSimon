@@ -37,3 +37,16 @@ def test_offline_llm_is_free_and_deterministic():
     a = OfflineLLM().complete(system="x", messages=[], model="claude-haiku-5-5")
     b = OfflineLLM().complete(system="x", messages=[], model="claude-haiku-5-5")
     assert a == b
+
+
+def test_draft_button_saves_a_reply_with_sources():
+    from app import knowledge
+    from app.llm.embeddings import OfflineEmbedder
+
+    c = _client()
+    session = next(main.app.dependency_overrides[main.get_session]())
+    knowledge.rebuild(session, knowledge.load_sample_store(), OfflineEmbedder())
+    c.post("/messages", data={"sender": "kati@example.com", "subject": "Order", "body": "Where is #1001?"})
+    c.post("/messages/1/draft")
+    page = c.get("/").text
+    assert "drafted" in page and "Order #1001" in page
