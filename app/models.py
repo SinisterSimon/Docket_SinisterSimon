@@ -2,7 +2,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, DateTime, Enum, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -43,3 +43,22 @@ class Draft(Base):
     output_tokens: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     message: Mapped[CustomerMessage] = relationship(back_populates="drafts")
+
+
+class KnowledgeChunk(Base):
+    """One searchable piece of the store's knowledge: a product or a section of a policy.
+
+    The vector is stored as JSON and searched in Python. A store has hundreds of chunks, not
+    millions, so a full scan takes milliseconds and works on SQLite and Postgres alike. pgvector
+    is the upgrade path if a store ever outgrows it.
+    """
+
+    __tablename__ = "knowledge_chunks"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    source: Mapped[str] = mapped_column(String(40), index=True)   # "product" or "policy"
+    ref: Mapped[str] = mapped_column(String(200))                 # file or product handle
+    title: Mapped[str] = mapped_column(String(300))
+    text: Mapped[str] = mapped_column(Text)
+    embed_model: Mapped[str] = mapped_column(String(60))
+    embedding: Mapped[list[float]] = mapped_column(JSON)

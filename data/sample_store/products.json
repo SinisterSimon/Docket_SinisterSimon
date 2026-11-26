@@ -1,0 +1,11 @@
+[
+  {"handle": "the-multi-location-snowboard", "title": "The Multi-location Snowboard",
+   "description": "All-mountain board with a medium flex and camber profile, for riders who do a bit of everything.",
+   "price_cents": 73454, "currency": "EUR", "variants": ["151 cm", "155 cm", "159 cm", "159W cm"]},
+  {"handle": "the-compare-at-price-snowboard", "title": "The Compare at Price Snowboard",
+   "description": "Soft-flex freestyle board with rocker, forgiving in the park and for progressing riders.",
+   "price_cents": 79422, "currency": "EUR", "variants": ["148 cm", "152 cm", "156 cm"]},
+  {"handle": "the-collection-snowboard-oxygen", "title": "The Collection Snowboard: Oxygen",
+   "description": "Stiff directional freeride board for deep snow and fast groomers.",
+   "price_cents": 102500, "currency": "EUR", "variants": ["156 cm", "160 cm", "164W cm"]}
+]

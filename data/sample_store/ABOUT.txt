@@ -1,0 +1,2 @@
+Sample knowledge for "Thread Snow Co.", the Shopify development store used by Thread and Docket.
+Everything here is made up for testing. Replace with a real store's policies and products in phase 6.
