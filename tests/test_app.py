@@ -1,12 +1,14 @@
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from app import main
-from app.db import Base, make_engine
+from app.db import Base
 
 
 def _client():
-    engine = make_engine("sqlite://")
+    engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
     Base.metadata.create_all(engine)
     local = sessionmaker(engine, expire_on_commit=False)
 
