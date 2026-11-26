@@ -7,7 +7,7 @@ store's products, policies and orders, drafts a reply with its sources, and a pe
 A fixed set of test questions measures how often each model answers correctly, and how often it
 invents facts.
 
-Status: **Phase 1** (knowledge base). See the roadmap below.
+Status: **Phase 2** (agent with tools). See the roadmap below.
 
 ## Roadmap
 
@@ -15,8 +15,8 @@ Status: **Phase 1** (knowledge base). See the roadmap below.
 |---|---|---|
 | 0 | Base app, shared LLM layer from Thread, CI | ✅ |
 | 1 | Knowledge base: products + policies, embeddings, search (RAG) | ✅ |
-| 2 | Tools: order status, stock, product lookup (read-only Shopify) | next |
-| 3 | Triage: question / order issue / complaint / spam, hand-off rules | |
+| 2 | Tools: order status, stock, product lookup (read-only Shopify) | ✅ |
+| 3 | Triage: question / order issue / complaint / spam, hand-off rules | next |
 | 4 | Evals: ~50 questions with known answers; accuracy, invented facts, tone, hand-off | |
 | 5 | Docket UI: drafts with sources, approve / edit | |
 | 6 | Real store in shadow mode | |
@@ -32,6 +32,16 @@ Status: **Phase 1** (knowledge base). See the roadmap below.
   so it tests the plumbing; real quality is measured with OpenAI embeddings in the evals (phase 4).
 - **Embed model stored per chunk.** Vectors from different models can't be compared, so search ignores
   chunks made by another model instead of returning nonsense.
+
+- **Tool calls as one JSON object per turn.** The same loop works with Claude, GPT and Gemini through
+  Thread's provider-neutral LLM layer, and offline a rule-based planner scripts the same turns so the
+  loop is tested for free. Native function calling per provider is the upgrade path.
+- **Order lookups check the sender's email.** A stranger who guesses an order number gets "no order
+  found", not someone else's address and items.
+- **Stock says "in stock" or "sold out", never unit counts.** Exact inventory is business data a
+  customer doesn't need.
+- **Every draft keeps its sources and tool calls.** A reviewer sees where each fact came from, and the
+  evals can check that every fact in a reply was actually looked up.
 
 ## Run locally
 

@@ -2,7 +2,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import JSON, DateTime, Enum, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, Enum, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -41,6 +41,9 @@ class Draft(Base):
     text: Mapped[str] = mapped_column(Text)
     input_tokens: Mapped[int] = mapped_column(Integer, default=0)
     output_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    handoff: Mapped[bool] = mapped_column(Boolean, default=False)
+    sources: Mapped[list[str]] = mapped_column(JSON, default=list)   # where each fact came from
+    steps: Mapped[list[dict]] = mapped_column(JSON, default=list)    # tool calls, for review and evals
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     message: Mapped[CustomerMessage] = relationship(back_populates="drafts")
 

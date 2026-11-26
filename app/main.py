@@ -6,10 +6,13 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app import knowledge
+from app import agent, knowledge
 from app.db import Base, SessionLocal, engine
+from app.llm import get_llm
 from app.llm.embeddings import get_embedder
-from app.models import CustomerMessage, KnowledgeChunk
+from app.models import CustomerMessage, Draft, KnowledgeChunk, Status
+from app.store import get_store
+from app.tools import ToolBox
 
 app = FastAPI(title="Docket")
 Base.metadata.create_all(engine)  # Alembic migrations arrive with the first schema change
@@ -28,10 +31,15 @@ def health():
 @app.get("/", response_class=HTMLResponse)
 def inbox(session: Session = Depends(get_session)):
     rows = session.scalars(select(CustomerMessage).order_by(CustomerMessage.received_at.desc())).all()
-    items = "".join(
-        f"<li><strong>{escape(m.sender)}</strong> · {escape(m.subject or '-')} · <em>{m.status.value}</em></li>"
-        for m in rows
-    ) or "<li>No messages yet.</li>"
+    def row(m: CustomerMessage) -> str:
+        d = m.drafts[-1] if m.drafts else None
+        draft = (f"<blockquote>{escape(d.text)}<br><small>{'HAND OFF · ' if d.handoff else ''}"
+                 f"sources: {escape(', '.join(d.sources) or 'none')} · {escape(d.model)}</small></blockquote>"
+                 if d else f"<form method=post action=/messages/{m.id}/draft><button>Draft reply</button></form>")
+        return (f"<li><strong>{escape(m.sender)}</strong> · {escape(m.subject or '-')} · <em>{m.status.value}</em>"
+                f"<p>{escape(m.body)}</p>{draft}</li>")
+
+    items = "".join(row(m) for m in rows) or "<li>No messages yet.</li>"
     return f"""<!doctype html><title>Docket</title><h1>Docket</h1><ul>{items}</ul>
 <form method=post action=/messages><input name=sender placeholder=From required>
 <input name=subject placeholder=Subject><textarea name=body required></textarea><button>Add</button></form>"""
@@ -65,3 +73,15 @@ def knowledge_page(q: str = Query(""), session: Session = Depends(get_session)):
 <form method=post action=/knowledge/rebuild><button>Rebuild from sample store</button></form>
 <form><input name=q value="{escape(q)}" placeholder="Ask like a customer would" size=50><button>Search</button></form>
 <ol>{results}</ol>"""
+
+
+@app.post("/messages/{message_id}/draft")
+def draft_reply(message_id: int, session: Session = Depends(get_session)):
+    m = session.get(CustomerMessage, message_id)
+    tools = ToolBox(session, get_embedder(), get_store(), m.sender)
+    r = agent.answer(get_llm(), tools, m.subject, m.body)
+    session.add(Draft(message_id=m.id, model=r.model, text=r.reply, handoff=r.handoff, sources=r.sources,
+                      steps=[s.__dict__ for s in r.steps], input_tokens=r.input_tokens, output_tokens=r.output_tokens))
+    m.status = Status.handed_off if r.handoff else Status.drafted
+    session.commit()
+    return RedirectResponse("/", status_code=303)
