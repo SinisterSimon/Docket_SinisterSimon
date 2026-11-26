@@ -13,7 +13,7 @@ class Base(DeclarativeBase):
 
 
 def make_engine(url: str | None = None):
-    url = url or os.getenv("DATABASE_URL", "sqlite:///inbox.db")
+    url = url or os.getenv("DATABASE_URL", "sqlite:///docket.db")
     if url.startswith("postgres://"):
         url = url.replace("postgres://", "postgresql+psycopg://", 1)
     return create_engine(url, connect_args={"check_same_thread": False} if url.startswith("sqlite") else {})

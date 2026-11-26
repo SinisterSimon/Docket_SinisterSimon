@@ -1,4 +1,4 @@
-"""One interface for every language model Inbox talks to (copied from Thread).
+"""One interface for every language model Docket talks to (copied from Thread).
 
 Everything else calls `get_llm()` and never imports a provider SDK directly, so providers
 stay swappable and tests run offline for free.

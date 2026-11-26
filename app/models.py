@@ -1,4 +1,4 @@
-"""Customer messages and the replies Inbox drafts for them."""
+"""Customer messages and the replies Docket drafts for them."""
 import enum
 from datetime import datetime
 

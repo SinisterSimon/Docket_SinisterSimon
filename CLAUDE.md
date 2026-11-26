@@ -1,6 +1,6 @@
-# Inbox: notes for AI coding assistants
+# Docket: notes for AI coding assistants
 
-An AI support inbox for Shopify stores. Sister project of Thread (SinisterSimon/Thread_SinisterSimon).
+An AI support desk for Shopify stores. Sister project of Thread (SinisterSimon/Thread_SinisterSimon).
 
 ## Commands
 - Run: `uvicorn app.main:app --reload` (http://localhost:8000)

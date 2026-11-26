@@ -1,4 +1,4 @@
-"""Inbox web app. Phase 0: list customer messages and add one by hand."""
+"""Docket web app. Phase 0: list customer messages and add one by hand."""
 from html import escape
 
 from fastapi import Depends, FastAPI, Form
@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.db import Base, SessionLocal, engine
 from app.models import CustomerMessage
 
-app = FastAPI(title="Inbox")
+app = FastAPI(title="Docket")
 Base.metadata.create_all(engine)  # Alembic migrations arrive with the first schema change
 
 
@@ -30,7 +30,7 @@ def inbox(session: Session = Depends(get_session)):
         f"<li><strong>{escape(m.sender)}</strong> · {escape(m.subject or '-')} · <em>{m.status.value}</em></li>"
         for m in rows
     ) or "<li>No messages yet.</li>"
-    return f"""<!doctype html><title>Inbox</title><h1>Inbox</h1><ul>{items}</ul>
+    return f"""<!doctype html><title>Docket</title><h1>Docket</h1><ul>{items}</ul>
 <form method=post action=/messages><input name=sender placeholder=From required>
 <input name=subject placeholder=Subject><textarea name=body required></textarea><button>Add</button></form>"""
 
