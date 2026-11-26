@@ -1,0 +1,16 @@
+[project]
+name = "inbox"
+version = "0.1.0"
+description = "An AI support inbox for Shopify stores: answers from the store's own data, measured by evals."
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["B008", "UP042"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
